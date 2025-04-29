@@ -1,0 +1,79 @@
+name: Build and Push Docker Containers to ECR
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag for the Docker image'
+        required: true
+  push:
+    branches:
+      - main
+      - prod
+
+env:
+  AWS_REGION: "us-east-2"
+  IMAGE_TAG: ${{ github.event.inputs.image_tag || github.sha }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Use secret for AWS Access Key ID
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Use secret for AWS Secret Access Key
+        aws-region: ${{ env.AWS_REGION }}  # Specify the AWS region correctly
+
+    - name: Log in to Amazon ECR
+      run: |
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+    - name: Build and Push webapp image
+      run: |
+        # Build the webapp image from the Dockerfile
+        docker build -t webapp:$IMAGE_TAG -f Dockerfile .
+        # Tag the image for ECR
+        docker tag webapp:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/webapp:$IMAGE_TAG
+        # Push the image to ECR
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/webapp:$IMAGE_TAG
+
+    - name: Build and Push redis image
+      run: |
+        # Build the redis image from the Dockerfile in the redis directory
+        docker build -t redis:$IMAGE_TAG -f redis/Dockerfile redis/
+        # Tag the image for ECR
+        docker tag redis:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/redis:$IMAGE_TAG
+        # Push the image to ECR
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/redis:$IMAGE_TAG
+
+    - name: Build and Push nginx image
+      run: |
+        # Build the nginx image from the Dockerfile in the nginx directory
+        docker build -t nginx:$IMAGE_TAG -f nginx/Dockerfile nginx/
+        # Tag the image for ECR
+        docker tag nginx:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/nginx:$IMAGE_TAG
+        # Push the image to ECR
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/nginx:$IMAGE_TAG
+
+    - name: Build and Push mysql image
+      run: |
+        # Build the mysql image from the Dockerfile in the database directory
+        docker build -t mysql:$IMAGE_TAG -f database/Dockerfile database/
+        # Tag the image for ECR
+        docker tag mysql:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/db:$IMAGE_TAG
+        # Push the image to ECR
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/db:$IMAGE_TAG
+
+    - name: Output ECR Image URIs
+      run: |
+        echo "Webapp Image URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/webapp:$IMAGE_TAG"
+        echo "Redis Image URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/redis:$IMAGE_TAG"
+        echo "Nginx Image URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/nginx:$IMAGE_TAG"
+        echo "MySQL Image URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/db:$IMAGE_TAG"

@@ -1,0 +1,219 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "webapp",
+            "image": "429121668835.dkr.ecr.us-east-2.amazonaws.com/webapp:6es73cde62dcdc9b2c940d8e87664c4069bfb0906",
+            "cpu": 1024,
+            "memory": 2048,
+            "portMappings": [
+                {
+                    "name": "webapp",
+                    "containerPort": 4000,
+                    "hostPort": 4000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "REDIS_HOST",
+                    "value": "localhost"
+                },
+                {
+                    "name": "NODE_ENV",
+                    "value": "development"
+                },
+                {
+                    "name": "DATABASE_NAME",
+                    "value": "users"
+                },
+                {
+                    "name": "DATABASE_HOST",
+                    "value": "localhost"
+                },
+                {
+                    "name": "DATABASE_PASSWORD",
+                    "value": "mypassword"
+                },
+                {
+                    "name": "DATABASE_USER",
+                    "value": "fazt"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "linuxParameters": {
+                "initProcessEnabled": false
+            },
+            "startTimeout": 30,
+            "stopTimeout": 120,
+            "user": "0",
+            "privileged": false,
+            "readonlyRootFilesystem": false,
+            "interactive": false,
+            "pseudoTerminal": false,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/aws/ecs/user-management-service/webapp",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "redis",
+            "image": "429121668835.dkr.ecr.us-east-2.amazonaws.com/redis:6e73cde62dcdc9b2c940d8e87664c4069bfb0906",
+            "cpu": 4096,
+            "memory": 8192,
+            "portMappings": [
+                {
+                    "name": "redis-6379-tcp",
+                    "containerPort": 6379,
+                    "hostPort": 6379,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "linuxParameters": {
+                "initProcessEnabled": false
+            },
+            "startTimeout": 30,
+            "stopTimeout": 120,
+            "user": "0",
+            "privileged": false,
+            "readonlyRootFilesystem": false,
+            "interactive": false,
+            "pseudoTerminal": false,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/aws/ecs/user-management-service/redis",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "nginx",
+            "image": "429121668835.dkr.ecr.us-east-2.amazonaws.com/nginx:6e73cde62dcdc9b2c940d8e87664c4069bfb0906",
+            "cpu": 1024,
+            "memory": 2048,
+            "portMappings": [
+                {
+                    "name": "nginx-80-tcp",
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "linuxParameters": {
+                "initProcessEnabled": false
+            },
+            "startTimeout": 30,
+            "stopTimeout": 120,
+            "user": "0",
+            "privileged": false,
+            "readonlyRootFilesystem": false,
+            "interactive": false,
+            "pseudoTerminal": false,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/aws/ecs/user-management-service/nginx",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "db",
+            "image": "429121668835.dkr.ecr.us-east-2.amazonaws.com/db:6e73cde62dcdc9b2c940d8e87664c4069bfb0906",
+            "cpu": 1024,
+            "memory": 2048,
+            "portMappings": [
+                {
+                    "name": "db-3306-tcp",
+                    "containerPort": 3306,
+                    "hostPort": 3306,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "MYSQL_DATABASE",
+                    "value": "users"
+                },
+                {
+                    "name": "MYSQL_PASSWORD",
+                    "value": "mypassword"
+                },
+                {
+                    "name": "MYSQL_ROOT_PASSWORD",
+                    "value": "mypassword"
+                },
+                {
+                    "name": "MYSQL_USER",
+                    "value": "fazt"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "linuxParameters": {
+                "initProcessEnabled": false
+            },
+            "startTimeout": 30,
+            "stopTimeout": 120,
+            "user": "0",
+            "privileged": false,
+            "readonlyRootFilesystem": false,
+            "interactive": false,
+            "pseudoTerminal": false,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/aws/ecs/user-management-service/db",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "systemControls": []
+        }
+    ],
+    "family": "user-management-service",
+    "taskRoleArn": "arn:aws:iam::429121668835:role/ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::429121668835:role/ecs-task-execution-role",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "8192",
+    "memory": "32768",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "tags": [
+        {
+            "key": "Project",
+            "value": "userManagementApp"
+        },
+        {
+            "key": "Environment",
+            "value": "Development"
+        }
+    ]
+}
